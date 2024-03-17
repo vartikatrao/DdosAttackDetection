@@ -113,7 +113,7 @@
   <br>
 
   <h1>Upload the File</h1>
-  <form form method="POST" enctype="multipart/form-data" action="{{ url_for('predictautoencoder') }}">
+  <form form method="POST" enctype="multipart/form-data" action="{{ url_for('predict_balanced') }}">
     <label for="csvFile">Select file:</label>
 
     <input type="file" id="fileInput" name="fileInput">
