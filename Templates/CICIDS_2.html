@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Lets predict !</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+      body {
+        background-color: #1c1c1c;
+        color: #f2f2f2;
+        font-family: 'Quicksand', sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+
+      h1 {
+        color: #f2f2f2;
+        font-size: 28px;
+        font-weight: bold;
+        margin: 20px 0;
+        text-align: center;
+        text-shadow: 1px 1px #333;
+        animation: fadein 1s;
+        font-family: 'Quicksand', sans-serif;
+      }
+
+      form {
+        background-color: #333;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin: 0 auto;
+        max-width: 600px;
+        padding: 20px;
+        animation: slidein 1s;
+      }
+
+      label {
+        display: block;
+        font-family: 'Quicksand', sans-serif;
+        font-size: 16px;
+        margin-bottom: 10px;
+        text-shadow: 1px 1px #333;
+      }
+
+      input[type="text"],
+      input[type="file"] {
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        color: #333;
+        font-size: 16px;
+        margin-bottom: 20px;
+        padding: 10px;
+        width: 100%;
+        background-color: #fff;
+      }
+
+      input[type="submit"] {
+        background: linear-gradient(to bottom right, #00ffff, #006eff);
+        border: none;
+        border-radius: 4px;
+        color: #f2f2f2;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 20px;
+        padding: 10px 20px;
+        text-shadow: 1px 1px #333;
+        animation: fadein 1s;
+      }
+
+
+      input[type="submit"]:hover {
+        background-color: #3e8e41;
+        animation: pulse 0.5s;
+      }
+
+      @keyframes fadein {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes slidein {
+        from { transform: translateX(-50px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+      }
+      body {
+  font-family: 'Roboto', sans-serif;
+}
+
+    </style>
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('index')}}" class="btn-primary">Home</a></li>
+        <li><a href="{{ url_for('about')}}" class="btn-primary">About</a></li>
+        <li><a href="{{ url_for('kaggle_balanced')}}" class="btn-primary">DDoS Balanced</a></li>
+        <li><a href="{{ url_for('kaggle_unbalanced')}}" class="btn-primary">DDos Unbalanced</a></li>
+        <li><a href="{{ url_for('CICIDS_1')}}" class="btn-primary">CICIDS 1</a></li>
+        <li><a href="{{ url_for('CICIDS_2')}}" class="btn-primary">CICIDS 2</a></li>
+      </ul>
+  </nav>
+  <br>
+  <br>
+  <br>
+
+  <h1>Upload the File</h1>
+  <form form method="POST" enctype="multipart/form-data" action="{{ url_for('predictautoencoder') }}">
+    <label for="csvFile">Select file:</label>
+
+    <input type="file" id="fileInput" name="fileInput">
+  <br>
+  <input type="submit" value="Predict">
+  </form>
+
+  <style>
+    nav {
+      background-color: #333;
+      padding: 10px 0;
+      position: fixed;
+      top: 0;
+      width: 100%;
+    }
+
+    ul {
+      display: flex;
+      justify-content: center;
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    li {
+      margin: 0 20px;
+    }
+
+    a {
+      color: #f2f2f2;
+      font-family: 'Quicksand', sans-serif;
+      text-decoration: none;
+      text-shadow: 1px 1px #333;
+    }
+  </style>
+</body>
+
+</html>

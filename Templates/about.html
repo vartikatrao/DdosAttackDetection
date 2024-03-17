@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>About</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400&display=swap" rel="stylesheet">
+
+  </head>
+  <body>
+    <div class="banner">
+      <img src="banner.png" alt="Banner Image">
+    </div>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('index')}}" class="btn-primary">Home</a></li>
+        <li><a href="{{ url_for('about')}}" class="btn-primary">About</a></li>
+        <li><a href="{{ url_for('kaggle_balanced')}}" class="btn-primary">DDoS Balanced</a></li>
+        <li><a href="{{ url_for('kaggle_unbalanced')}}" class="btn-primary">DDos Unbalanced</a></li>
+        <li><a href="{{ url_for('CICIDS_1')}}" class="btn-primary">CICIDS 1</a></li>
+        <li><a href="{{ url_for('CICIDS_2')}}" class="btn-primary">CICIDS 2</a></li>
+      </ul>
+  </nav>
+  <br>
+  <div>
+    <br>
+    <h1>About the Model</p></h1>
+  </div>
+  <div style="display: flex; justify-content: center; align-items: center; height: 74vh; line-height: 2.5";>
+    <div style="background-color: #333; border: 0px solid black; width: 80%; height: 80%; border-radius: 10px";>
+      <p >Welcome to our website, where we host a machine learning model that predicts hard drive failures using time-series data. Our models are based on the Backblaze dataset, specifically the ST4000DM000 model .<br>
+
+Our LSTM model is designed to accurately predict equipment failures and estimate the condition of equipment. It utilizes time-series data to create sequences of records that end with a failure prediction window, and then trains the model using three layers of stacked LSTMs with early stopping and class weights. Our autoencoder model is designed to detect anomalies and alert maintenance teams to potential issues before they become critical. It works by learning the normal behavior of the equipment and identifying deviations from that behavior. This helps maintenance teams identify issues early and prevent costly downtime.<br>
+
+Our model is perfect for businesses that rely on equipment and machinery to operate efficiently. By predicting failures before they happen and detecting anomalies, our model can save businesses time and money by reducing downtime and minimizing maintenance costs.<br>
+
+Our website offers a user-friendly interface where you can upload your own hard drive data and get predictions for potential failures. We hope that our model will be a valuable tool for anyone looking to improve the reliability and performance of their hard drives.</p>
+    </div>
+  </div>
+
+
+
+
+  <style>
+    nav {
+      background-color: #333;
+      padding: 10px 0;
+      position: fixed;
+      right:0px;
+      top: 0;
+      width: 100%;
+    }
+
+    ul {
+      display: flex;
+      justify-content: center;
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    li {
+      margin: 0 20px;
+    }
+
+    a {
+      color: #f2f2f2;
+      font-family: 'Quicksand', sans-serif;
+      text-decoration: none;
+      text-shadow: 1px 1px #333;
+    }
+    body {
+      background-color: #1c1c1c;
+      color: #f2f2f2;
+      font-family: 'Quicksand', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</body>
+
+</html>
