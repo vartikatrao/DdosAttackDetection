@@ -29,6 +29,17 @@
         <td>{{ cnn_prediction }}</td>
       </tr>
     </table>
+    <img src="data:image/png;base64,{{ plot_data }}" alt="Scatter Plot" style="display:block; margin: 0 auto;" width="600" height="430">
+    <table>
+      <tr>
+        <th>DNN Inference time:</th>
+        <td>{{ dnn_inference_time }} s</td>
+      </tr>
+      <tr>
+        <th>DCNN prediction:</th>
+        <td>{{ cnn_inference_time }} s</td>
+      </tr>
+    </table>
 <style>
 
 

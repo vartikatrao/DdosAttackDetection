@@ -11,6 +11,7 @@ from sklearn.metrics import mean_squared_error
 import pandas as pd  
 app = Flask(__name__,template_folder='Templates')
 from flask import request
+import time 
 
 @app.route('/kaggle_balanced')
 def kaggle_balanced():
@@ -153,15 +154,51 @@ def predict_balanced():
         # Keep only the desired columns
         x_test = df.values
         x_test_cnn = x_test.reshape(x_test.shape[0], 52, 1).astype('float32')
+
+        start_time_cnn = time.time()
         y_pred_cnn= np.argmax(model_cnn_balanced.predict(x_test_cnn), axis=-1)
+        end_time_cnn= time.time()
+        inference_time_cnn= end_time_cnn- start_time_cnn
         print(y_pred_cnn)
         x_test_tensor = tf.convert_to_tensor(x_test, dtype=tf.float32)
+        start_time_dnn= time.time()
         y_pred_dnn= np.argmax(model_dnn_balanced.predict(x_test_tensor), axis=-1)
+        end_time_dnn= time.time()
+        inference_time_dnn= end_time_dnn- start_time_dnn
         print(y_pred_dnn)
-        pred_dict= {0: 'ddos', 1: 'safe'}
-        cnn_prediction= pred_dict[y_pred_cnn[0]]
-        dnn_prediction= pred_dict[y_pred_dnn[0]]
-        return render_template('results.html', cnn_prediction= cnn_prediction, dnn_prediction=dnn_prediction )
+        models = ['DCNN', 'DNN']
+        inference_times = [inference_time_cnn, inference_time_dnn]
+         # Create a figure and axis object
+        fig, ax = plt.subplots(figsize=(10, 8))
+
+        # Create a scatter plot of the predicted and expected labels
+        ax.bar(models[::-1], inference_times[::-1], color=['purple', 'coral'])
+
+        # Set the x and y axis labels and the title
+        ax.set_xlabel('Models', fontsize=20, color="white")
+        ax.set_ylabel('Inference Times ', fontsize=20, color='white')
+        ax.set_title('Models vs Inference Times', fontsize=28, color= 'white')
+
+        # Set the x and y axis ticks color and size
+        ax.tick_params(axis='x', colors='white', labelsize=16)
+        ax.tick_params(axis='y', colors='white', labelsize=16)
+
+        # Remove the gridlines and add a legend
+        ax.grid(False)
+        ax.legend()
+        fig.patch.set_alpha(0)
+        # Save the plot to a buffer
+        buf = BytesIO()
+        plt.savefig(buf, format='png')
+        plt.close()
+
+        # Convert the buffer content to a string and encode it as base64
+        data = base64.b64encode(buf.getbuffer()).decode('ascii')
+
+        pred_dict = {0: 'ddos', 1: 'safe'}
+        cnn_prediction = pred_dict[y_pred_cnn[0]]
+        dnn_prediction = pred_dict[y_pred_dnn[0]]
+        return render_template('results.html', cnn_prediction=cnn_prediction, dnn_prediction=dnn_prediction, plot_data= data, cnn_inference_time=inference_time_cnn, dnn_inference_time= inference_time_dnn )
     else:
         return render_template('results.html')
 
@@ -175,89 +212,89 @@ def predict_unbalanced():
         # Load the uploaded files
         file = request.files['fileInput'] 
         dtypes = {
-    'Src IP': 'category',
-    'Src Port': 'uint16',
-    'Dst IP': 'category',
-    'Dst Port': 'uint16',
-    'Protocol': 'category',
-    'Flow Duration': 'uint32',
-    'Tot Fwd Pkts': 'uint32',
-    'Tot Bwd Pkts': 'uint32',
-    'TotLen Fwd Pkts': 'float32',
-    'TotLen Bwd Pkts': 'float32',
-    'Fwd Pkt Len Max': 'float32',
-    'Fwd Pkt Len Min': 'float32',
-    'Fwd Pkt Len Mean': 'float32',
-    'Fwd Pkt Len Std': 'float32',
-    'Bwd Pkt Len Max': 'float32',
-    'Bwd Pkt Len Min': 'float32',
-    'Bwd Pkt Len Mean': 'float32',
-    'Bwd Pkt Len Std': 'float32',
-    'Flow Byts/s': 'float32',
-    'Flow Pkts/s': 'float32',
-    'Flow IAT Mean': 'float32',
-    'Flow IAT Std': 'float32',
-    'Flow IAT Max': 'float32',
-    'Flow IAT Min': 'float32',
-    'Fwd IAT Tot': 'float32',
-    'Fwd IAT Mean': 'float32',
-    'Fwd IAT Std': 'float32',
-    'Fwd IAT Max': 'float32',
-    'Fwd IAT Min': 'float32',
-    'Bwd IAT Tot': 'float32',
-    'Bwd IAT Mean': 'float32',
-    'Bwd IAT Std': 'float32',
-    'Bwd IAT Max': 'float32',
-    'Bwd IAT Min': 'float32',
-    'Fwd PSH Flags': 'category',
-    'Bwd PSH Flags': 'category',
-    'Fwd URG Flags': 'category',
-    'Bwd URG Flags': 'category',
-    'Fwd Header Len': 'uint32',
-    'Bwd Header Len': 'uint32',
-    'Fwd Pkts/s': 'float32',
-    'Bwd Pkts/s': 'float32',
-    'Pkt Len Min': 'float32',
-    'Pkt Len Max': 'float32',
-    'Pkt Len Mean': 'float32',
-    'Pkt Len Std': 'float32',
-    'Pkt Len Var': 'float32',
-    'FIN Flag Cnt': 'category',
-    'SYN Flag Cnt': 'category',
-    'RST Flag Cnt': 'category',
-    'PSH Flag Cnt': 'category',
-    'ACK Flag Cnt': 'category',
-    'URG Flag Cnt': 'category',
-    'CWE Flag Count': 'category',
-    'ECE Flag Cnt': 'category',
-    'Down/Up Ratio': 'float32',
-    'Pkt Size Avg': 'float32',
-    'Fwd Seg Size Avg': 'float32',
-    'Bwd Seg Size Avg': 'float32',
-    'Fwd Byts/b Avg': 'uint32',
-    'Fwd Pkts/b Avg': 'uint32',
-    'Fwd Blk Rate Avg': 'uint32',
-    'Bwd Byts/b Avg': 'uint32',
-    'Bwd Pkts/b Avg': 'uint32',
-    'Bwd Blk Rate Avg': 'uint32',
-    'Subflow Fwd Pkts': 'uint32',
-    'Subflow Fwd Byts': 'uint32',
-    'Subflow Bwd Pkts': 'uint32',
-    'Subflow Bwd Byts': 'uint32',
-    'Init Fwd Win Byts': 'uint32',
-    'Init Bwd Win Byts': 'uint32',
-    'Fwd Act Data Pkts': 'uint32',
-    'Fwd Seg Size Min': 'uint32',
-    'Active Mean': 'float32',
-    'Active Std': 'float32',
-    'Active Max': 'float32',
-    'Active Min': 'float32',
-    'Idle Mean': 'float32',
-    'Idle Std': 'float32',
-    'Idle Max': 'float32',
-    'Idle Min': 'float32',
-    'Label': 'category'
-}
+            'Src IP': 'category',
+            'Src Port': 'uint16',
+            'Dst IP': 'category',
+            'Dst Port': 'uint16',
+            'Protocol': 'category',
+            'Flow Duration': 'uint32',
+            'Tot Fwd Pkts': 'uint32',
+            'Tot Bwd Pkts': 'uint32',
+            'TotLen Fwd Pkts': 'float32',
+            'TotLen Bwd Pkts': 'float32',
+            'Fwd Pkt Len Max': 'float32',
+            'Fwd Pkt Len Min': 'float32',
+            'Fwd Pkt Len Mean': 'float32',
+            'Fwd Pkt Len Std': 'float32',
+            'Bwd Pkt Len Max': 'float32',
+            'Bwd Pkt Len Min': 'float32',
+            'Bwd Pkt Len Mean': 'float32',
+            'Bwd Pkt Len Std': 'float32',
+            'Flow Byts/s': 'float32',
+            'Flow Pkts/s': 'float32',
+            'Flow IAT Mean': 'float32',
+            'Flow IAT Std': 'float32',
+            'Flow IAT Max': 'float32',
+            'Flow IAT Min': 'float32',
+            'Fwd IAT Tot': 'float32',
+            'Fwd IAT Mean': 'float32',
+            'Fwd IAT Std': 'float32',
+            'Fwd IAT Max': 'float32',
+            'Fwd IAT Min': 'float32',
+            'Bwd IAT Tot': 'float32',
+            'Bwd IAT Mean': 'float32',
+            'Bwd IAT Std': 'float32',
+            'Bwd IAT Max': 'float32',
+            'Bwd IAT Min': 'float32',
+            'Fwd PSH Flags': 'category',
+            'Bwd PSH Flags': 'category',
+            'Fwd URG Flags': 'category',
+            'Bwd URG Flags': 'category',
+            'Fwd Header Len': 'uint32',
+            'Bwd Header Len': 'uint32',
+            'Fwd Pkts/s': 'float32',
+            'Bwd Pkts/s': 'float32',
+            'Pkt Len Min': 'float32',
+            'Pkt Len Max': 'float32',
+            'Pkt Len Mean': 'float32',
+            'Pkt Len Std': 'float32',
+            'Pkt Len Var': 'float32',
+            'FIN Flag Cnt': 'category',
+            'SYN Flag Cnt': 'category',
+            'RST Flag Cnt': 'category',
+            'PSH Flag Cnt': 'category',
+            'ACK Flag Cnt': 'category',
+            'URG Flag Cnt': 'category',
+            'CWE Flag Count': 'category',
+            'ECE Flag Cnt': 'category',
+            'Down/Up Ratio': 'float32',
+            'Pkt Size Avg': 'float32',
+            'Fwd Seg Size Avg': 'float32',
+            'Bwd Seg Size Avg': 'float32',
+            'Fwd Byts/b Avg': 'uint32',
+            'Fwd Pkts/b Avg': 'uint32',
+            'Fwd Blk Rate Avg': 'uint32',
+            'Bwd Byts/b Avg': 'uint32',
+            'Bwd Pkts/b Avg': 'uint32',
+            'Bwd Blk Rate Avg': 'uint32',
+            'Subflow Fwd Pkts': 'uint32',
+            'Subflow Fwd Byts': 'uint32',
+            'Subflow Bwd Pkts': 'uint32',
+            'Subflow Bwd Byts': 'uint32',
+            'Init Fwd Win Byts': 'uint32',
+            'Init Bwd Win Byts': 'uint32',
+            'Fwd Act Data Pkts': 'uint32',
+            'Fwd Seg Size Min': 'uint32',
+            'Active Mean': 'float32',
+            'Active Std': 'float32',
+            'Active Max': 'float32',
+            'Active Min': 'float32',
+            'Idle Mean': 'float32',
+            'Idle Std': 'float32',
+            'Idle Max': 'float32',
+            'Idle Min': 'float32',
+            'Label': 'category'
+        }
         df = pd.read_csv(file, dtype=dtypes)
 
         # List of columns to keep
@@ -279,15 +316,56 @@ def predict_unbalanced():
         # Keep only the desired columns
         x_test = df.values
         x_test_cnn = x_test.reshape(x_test.shape[0], 52, 1).astype('float32')
-        y_pred_cnn= np.argmax(model_cnn_unbalanced.predict(x_test_cnn), axis=-1)
-        print(y_pred_cnn)
+        
+        # Measure inference time for CNN model
+        start_time_cnn = time.time()
+        y_pred_cnn = np.argmax(model_cnn_unbalanced.predict(x_test_cnn), axis=-1)
+        end_time_cnn = time.time()
+        inference_time_cnn = end_time_cnn - start_time_cnn
+        print("Inference time for CNN model:", inference_time_cnn, "seconds")
+        
         x_test_tensor = tf.convert_to_tensor(x_test, dtype=tf.float32)
-        y_pred_dnn= np.argmax(model_dnn_unbalanced.predict(x_test_tensor), axis=-1)
-        print(y_pred_dnn)
-        pred_dict= {0: 'ddos', 1: 'safe'}
-        cnn_prediction= pred_dict[y_pred_cnn[0]]
-        dnn_prediction= pred_dict[y_pred_dnn[0]]
-        return render_template('results.html', cnn_prediction= cnn_prediction, dnn_prediction=dnn_prediction )
+        
+        # Measure inference time for DNN model
+        start_time_dnn = time.time()
+        y_pred_dnn = np.argmax(model_dnn_unbalanced.predict(x_test_tensor), axis=-1)
+        end_time_dnn = time.time()
+        inference_time_dnn = end_time_dnn - start_time_dnn
+        print("Inference time for DNN model:", inference_time_dnn, "seconds")
+        # Plotting the bar graph for inference times
+        models = ['DCNN', 'DNN']
+        inference_times = [inference_time_cnn, inference_time_dnn]
+         # Create a figure and axis object
+        fig, ax = plt.subplots(figsize=(10, 8))
+
+        # Create a scatter plot of the predicted and expected labels
+        ax.bar(models[::-1], inference_times[::-1], color=['purple', 'coral'])
+
+        # Set the x and y axis labels and the title
+        ax.set_xlabel('Models', fontsize=20, color="white")
+        ax.set_ylabel('Inference Times ', fontsize=20, color='white')
+        ax.set_title('Models vs Inference Times', fontsize=28, color= 'white')
+
+        # Set the x and y axis ticks color and size
+        ax.tick_params(axis='x', colors='white', labelsize=16)
+        ax.tick_params(axis='y', colors='white', labelsize=16)
+
+        # Remove the gridlines and add a legend
+        ax.grid(False)
+        ax.legend()
+        fig.patch.set_alpha(0)
+        # Save the plot to a buffer
+        buf = BytesIO()
+        plt.savefig(buf, format='png')
+        plt.close()
+
+        # Convert the buffer content to a string and encode it as base64
+        data = base64.b64encode(buf.getbuffer()).decode('ascii')
+
+        pred_dict = {0: 'ddos', 1: 'safe'}
+        cnn_prediction = pred_dict[y_pred_cnn[0]]
+        dnn_prediction = pred_dict[y_pred_dnn[0]]
+        return render_template('results.html', cnn_prediction=cnn_prediction, dnn_prediction=dnn_prediction, plot_data= data, cnn_inference_time=inference_time_cnn, dnn_inference_time= inference_time_dnn )
     else:
         # Render the predictlstm.html template for GET requests
         return render_template('results.html')
