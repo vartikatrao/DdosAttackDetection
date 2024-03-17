@@ -35,7 +35,7 @@ def CICIDS_1():
 
 @app.route('/CICIDS_2')
 def CICIDS_2():
-    return render_template('CICIDS_2')
+    return render_template('CICIDS_2.html')
 
 @app.route('/')
 def index():
@@ -45,8 +45,8 @@ def index():
 def selectdataset():
     return render_template('selectdataset.html')
 
-model_cnn_balanced = keras.models.load_model('models/kaggle/balanced/cnn_model.h5')
-model_dnn_balanced= keras.models.load_model('models/kaggle/balanced/dnn_model.h5')
+model_cnn_balanced = keras.models.load_model('models//kaggle//balanced//cnn_model.h5')
+model_dnn_balanced= keras.models.load_model('models//kaggle//balanced//dnn_model.h5')
 @app.route('/predict_balanced', methods=['GET', 'POST'])
 def predict_balanced():
     if request.method == 'POST':
@@ -207,8 +207,8 @@ def predict_balanced():
         return render_template('results.html')
 
 
-model_cnn_unbalanced = keras.models.load_model('models/kaggle/unbalanced/imbal_dnn_model.h5')
-model_dnn_unbalanced= keras.models.load_model('models/kaggle/unbalanced/unbalanced_cnn.h5')
+model_cnn_unbalanced = keras.models.load_model('models//kaggle//unbalanced//imbal_dnn_model.h5')
+model_dnn_unbalanced= keras.models.load_model('models//kaggle//unbalanced//unbalanced_cnn.h5')
 @app.route('/predict_unbalanced', methods=['GET', 'POST'])
 def predict_unbalanced():
     if request.method == 'POST':
@@ -368,8 +368,8 @@ def preprocess_cicids17_model(df):
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(data_np)
     return X_scaled
-cicids1dcnn=keras.models.load_model('models/cicids1/dcnn_model.h5')
-cicids1dnn=keras.models.load_model('models/cicids1/dnn_model.h5')
+cicids1dcnn=keras.models.load_model('models//CICIDS_1//dcnn_model.h5')
+cicids1dnn=keras.models.load_model('models//CICIDS_1//dnn_model.h5')
 @app.route('/predict_CICIDS1', methods=['GET', 'POST'])
 def predict_CICIDS1():
     if request.method == 'POST':
@@ -451,6 +451,90 @@ def predict_CICIDS1():
     else:
         return render_template('results.html')
 
+# cicids2_resnet=keras.models.load_model('models//CICIDS_2//resnet_model.h5')
+# cicids2_vgg16=keras.models.load_model('models//CICIDS_2//vgg_16_model.h5')
+
+@app.route('/predict_CICIDS2', methods=['GET', 'POST'])
+def predict_CICIDS2():
+    if request.method == 'POST':
+        file = request.files['fileInput']
+        df = pd.read_csv(file)
+        X = preprocess_cicids17_model(df)
+        
+        start_time_cnn = time.time()
+        # pred_cnn = cicids2_resnet.predict(X)
+        pred_cnn=0
+        end_time_cnn = time.time()
+        inference_time_cnn = end_time_cnn - start_time_cnn
+        
+        start_time_dnn = time.time()
+        # pred_dnn = cicids2_vgg16.predict(X)
+        end_time_dnn = time.time()
+        inference_time_dnn = end_time_dnn - start_time_dnn
+        
+        classes = ["Class {}".format(i) for i in range(15)]
+        print(classes)
+        print(pred_cnn)
+        print(pred_dnn)
+        attack_types_cnn = [classes[np.argmax(p)] for p in pred_cnn]
+        attack_types_dnn = [classes[np.argmax(p)] for p in pred_dnn]
+        label_mappings_dict = {
+            0: 'BENIGN',
+            1: 'Bot',
+            2: 'DDoS',
+            3: 'DoS GoldenEye',
+            4: 'DoS Hulk',
+            5: 'DoS Slowhttptest',
+            6: 'DoS slowloris',
+            7: 'FTP-Patator',
+            8: 'Heartbleed',
+            9: 'Infiltration',
+            10: 'PortScan',
+            11: 'SSH-Patator',
+            12: 'Web Attack ï¿½ Brute Force',
+            13: 'Web Attack ï¿½ Sql Injection',
+            14: 'Web Attack ï¿½ XSS'
+        }
+
+        cnn = [label_mappings_dict[np.argmax(label)] for label in pred_cnn]
+        dnn = [label_mappings_dict[np.argmax(label)] for label in pred_dnn]
+
+        # Now cnn and dnn contain the original labels
+        print("CNN Predictions:", cnn)
+        print("DNN Predictions:", dnn)
+
+        print(attack_types_cnn)
+        print(attack_types_dnn)
+        # Generate plot
+        models = ['Resnet', 'VGG 16']
+        inference_times = [inference_time_cnn, inference_time_dnn]
+
+        fig, ax = plt.subplots(figsize=(10, 8))
+        ax.bar(models[::-1], inference_times[::-1], color=['purple', 'coral'])
+        ax.set_xlabel('Models', fontsize=20, color="white")
+        ax.set_ylabel('Inference Times ', fontsize=20, color='white')
+        ax.set_title('Models vs Inference Times', fontsize=28, color= 'white')
+        ax.tick_params(axis='x', colors='white', labelsize=16)
+        ax.tick_params(axis='y', colors='white', labelsize=16)
+        ax.grid(False)
+        fig.patch.set_alpha(0)
+        
+        # Save the plot to a buffer
+        buf = BytesIO()
+        plt.savefig(buf, format='png')
+        plt.close()
+
+        # Convert the buffer content to a string and encode it as base64
+        data = base64.b64encode(buf.getbuffer()).decode('ascii')
+        # Render the template with the results
+        return render_template('results.html', 
+                               cnn_prediction=cnn, 
+                               dnn_prediction=dnn, 
+                               plot_data=data, 
+                               cnn_inference_time=inference_time_cnn, 
+                               dnn_inference_time=inference_time_dnn)
+    else:
+        return render_template('results.html')
 
 
 if __name__ == '__main__':
