@@ -24,17 +24,17 @@
   <br>
   <div>
     <br>
-    <h1>About the Model</p></h1>
+    <h1>What is DDoS and Why use Deep Learning for DDoS detection</p></h1>
   </div>
   <div style="display: flex; justify-content: center; align-items: center; height: 74vh; line-height: 2.5";>
-    <div style="background-color: #333; border: 0px solid black; width: 80%; height: 80%; border-radius: 10px";>
-      <p >Welcome to our website, where we host a machine learning model that predicts hard drive failures using time-series data. Our models are based on the Backblaze dataset, specifically the ST4000DM000 model .<br>
+    <div style="background-color: #333; border: 0px solid black; width: 80%; height: 65%; border-radius: 10px";>
+      <p >A Distributed Denial of Service (DDoS) attack is a malicious attempt to cripple a website or online service by flooding it with junk traffic. Imagine a horde of attackers bombarding a store entrance with empty shopping carts, preventing legitimate customers from entering. In the digital world, this junk traffic overwhelms the server's capacity to handle real requests, rendering it inaccessible to genuine users. <br>
+        Intrusion Detection Systems (IDS) play a vital role in combating DDoS attacks, but traditional methods often struggle with: <br>
 
-Our LSTM model is designed to accurately predict equipment failures and estimate the condition of equipment. It utilizes time-series data to create sequences of records that end with a failure prediction window, and then trains the model using three layers of stacked LSTMs with early stopping and class weights. Our autoencoder model is designed to detect anomalies and alert maintenance teams to potential issues before they become critical. It works by learning the normal behavior of the equipment and identifying deviations from that behavior. This helps maintenance teams identify issues early and prevent costly downtime.<br>
-
-Our model is perfect for businesses that rely on equipment and machinery to operate efficiently. By predicting failures before they happen and detecting anomalies, our model can save businesses time and money by reducing downtime and minimizing maintenance costs.<br>
-
-Our website offers a user-friendly interface where you can upload your own hard drive data and get predictions for potential failures. We hope that our model will be a valuable tool for anyone looking to improve the reliability and performance of their hard drives.</p>
+        <b>Evolving Threats:</b> Attackers constantly develop new tactics, making it difficult for signature-based IDS (which rely on pre-defined attack patterns) to keep up. <br>
+        <b> Positives: </b>Traditional IDS can generate false alarms, wasting valuable time and resources investigating non-existent threats. <br>
+        <b>Scalability: </b> Large-scale DDoS attacks can overwhelm traditional IDS, rendering them ineffective.<br>
+        This is where Deep Learning comes in, offering a powerful tool for more accurate and adaptable DDoS detection.</p>
     </div>
   </div>
 
@@ -74,8 +74,14 @@ Our website offers a user-friendly interface where you can upload your own hard 
       color: #f2f2f2;
       font-family: 'Quicksand', sans-serif;
       margin: 0;
-      padding: 0;
+      padding: 20px;
     }
+    h1 {
+    padding-left: 20px; /* Add this line to add padding on the left */
+  }
+  p {
+    padding-left: 20px; /* Add this line to add padding on the left */
+  }
   </style>
 </body>
 
