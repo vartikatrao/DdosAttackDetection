@@ -297,78 +297,59 @@ def predict_unbalanced():
         }
         df = pd.read_csv(file, dtype=dtypes)
 
-        # List of columns to keep
         desired_columns = ['Src Port', 'Dst Port', 'Protocol', 'Flow Duration',
-                        'Tot Fwd Pkts', 'Tot Bwd Pkts', 'Fwd Pkt Len Max',
-                        'Fwd Pkt Len Min', 'Fwd Pkt Len Mean', 'Bwd Pkt Len Max',
-                        'Bwd Pkt Len Min', 'Bwd Pkt Len Mean', 'Flow Byts/s',
-                        'Flow Pkts/s', 'Flow IAT Mean', 'Flow IAT Std', 'Flow IAT Max',
-                        'Flow IAT Min', 'Fwd IAT Tot', 'Fwd IAT Mean', 'Fwd IAT Std',
-                        'Fwd IAT Max', 'Bwd IAT Tot', 'Bwd IAT Mean', 'Bwd IAT Std',
-                        'Bwd IAT Max', 'Bwd IAT Min', 'Fwd Pkts/s', 'Bwd Pkts/s',
-                        'Pkt Len Min', 'Pkt Len Max', 'Pkt Len Mean', 'Pkt Len Std',
-                        'Pkt Len Var', 'SYN Flag Cnt', 'RST Flag Cnt', 'PSH Flag Cnt',
-                        'ACK Flag Cnt', 'ECE Flag Cnt', 'Down/Up Ratio', 'Pkt Size Avg',
-                        'Init Fwd Win Byts', 'Init Bwd Win Byts', 'Fwd Seg Size Min',
-                        'Active Mean', 'Active Std', 'Active Max', 'Active Min',
-                        'Idle Mean', 'Idle Std', 'Idle Max', 'Idle Min']
+                            'Tot Fwd Pkts', 'Tot Bwd Pkts', 'Fwd Pkt Len Max',
+                            'Fwd Pkt Len Min', 'Fwd Pkt Len Mean', 'Bwd Pkt Len Max',
+                            'Bwd Pkt Len Min', 'Bwd Pkt Len Mean', 'Flow Byts/s',
+                            'Flow Pkts/s', 'Flow IAT Mean', 'Flow IAT Std', 'Flow IAT Max',
+                            'Flow IAT Min', 'Fwd IAT Tot', 'Fwd IAT Mean', 'Fwd IAT Std',
+                            'Fwd IAT Max', 'Bwd IAT Tot', 'Bwd IAT Mean', 'Bwd IAT Std',
+                            'Bwd IAT Max', 'Bwd IAT Min', 'Fwd Pkts/s', 'Bwd Pkts/s',
+                            'Pkt Len Min', 'Pkt Len Max', 'Pkt Len Mean', 'Pkt Len Std',
+                            'Pkt Len Var', 'SYN Flag Cnt', 'RST Flag Cnt', 'PSH Flag Cnt',
+                            'ACK Flag Cnt', 'ECE Flag Cnt', 'Down/Up Ratio', 'Pkt Size Avg',
+                            'Init Fwd Win Byts', 'Init Bwd Win Byts', 'Fwd Seg Size Min',
+                            'Active Mean', 'Active Std', 'Active Max', 'Active Min',
+                            'Idle Mean', 'Idle Std', 'Idle Max', 'Idle Min']
         df = df[desired_columns]
-        # Keep only the desired columns
         x_test = df.values
         x_test_cnn = x_test.reshape(x_test.shape[0], 52, 1).astype('float32')
-        
-        # Measure inference time for CNN model
+
         start_time_cnn = time.time()
         y_pred_cnn = np.argmax(model_cnn_unbalanced.predict(x_test_cnn), axis=-1)
         end_time_cnn = time.time()
         inference_time_cnn = end_time_cnn - start_time_cnn
-        print("Inference time for CNN model:", inference_time_cnn, "seconds")
-        
+
         x_test_tensor = tf.convert_to_tensor(x_test, dtype=tf.float32)
-        
-        # Measure inference time for DNN model
+
         start_time_dnn = time.time()
         y_pred_dnn = np.argmax(model_dnn_unbalanced.predict(x_test_tensor), axis=-1)
         end_time_dnn = time.time()
         inference_time_dnn = end_time_dnn - start_time_dnn
-        print("Inference time for DNN model:", inference_time_dnn, "seconds")
-        # Plotting the bar graph for inference times
+
         models = ['DCNN', 'DNN']
         inference_times = [inference_time_cnn, inference_time_dnn]
-         # Create a figure and axis object
+
         fig, ax = plt.subplots(figsize=(10, 8))
-
-        # Create a scatter plot of the predicted and expected labels
         ax.bar(models[::-1], inference_times[::-1], color=['purple', 'coral'])
-
-        # Set the x and y axis labels and the title
         ax.set_xlabel('Models', fontsize=20, color="white")
         ax.set_ylabel('Inference Times ', fontsize=20, color='white')
         ax.set_title('Models vs Inference Times', fontsize=28, color= 'white')
-
-        # Set the x and y axis ticks color and size
         ax.tick_params(axis='x', colors='white', labelsize=16)
         ax.tick_params(axis='y', colors='white', labelsize=16)
-
-        # Remove the gridlines and add a legend
         ax.grid(False)
         ax.legend()
         fig.patch.set_alpha(0)
-        # Save the plot to a buffer
         buf = BytesIO()
         plt.savefig(buf, format='png')
         plt.close()
 
-        # Convert the buffer content to a string and encode it as base64
         data = base64.b64encode(buf.getbuffer()).decode('ascii')
 
         pred_dict = {0: 'ddos', 1: 'safe'}
         cnn_prediction = pred_dict[y_pred_cnn[0]]
         dnn_prediction = pred_dict[y_pred_dnn[0]]
         return render_template('results.html', cnn_prediction=cnn_prediction, dnn_prediction=dnn_prediction, plot_data= data, cnn_inference_time=inference_time_cnn, dnn_inference_time= inference_time_dnn )
-    else:
-        # Render the predictlstm.html template for GET requests
-        return render_template('results.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
