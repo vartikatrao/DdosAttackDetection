@@ -2,19 +2,35 @@
 <html>
   <head>
     <title>Lets predict !</title>
+<<<<<<< HEAD
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400&display=swap" rel="stylesheet">
+=======
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400&display=swap"
+      rel="stylesheet"
+    />
+>>>>>>> 2fc817e (cicids)
     <style>
       body {
         background-color: #1c1c1c;
         color: #f2f2f2;
+<<<<<<< HEAD
         font-family: 'Quicksand', sans-serif;
+=======
+        font-family: "Quicksand", sans-serif;
+>>>>>>> 2fc817e (cicids)
         margin: 0;
         padding: 0;
       }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2fc817e (cicids)
       h1 {
         color: #f2f2f2;
         font-size: 28px;
@@ -23,7 +39,11 @@
         text-align: center;
         text-shadow: 1px 1px #333;
         animation: fadein 1s;
+<<<<<<< HEAD
         font-family: 'Quicksand', sans-serif;
+=======
+        font-family: "Quicksand", sans-serif;
+>>>>>>> 2fc817e (cicids)
       }
 
       form {
@@ -38,7 +58,11 @@
 
       label {
         display: block;
+<<<<<<< HEAD
         font-family: 'Quicksand', sans-serif;
+=======
+        font-family: "Quicksand", sans-serif;
+>>>>>>> 2fc817e (cicids)
         font-size: 16px;
         margin-bottom: 10px;
         text-shadow: 1px 1px #333;
@@ -70,13 +94,17 @@
         animation: fadein 1s;
       }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2fc817e (cicids)
       input[type="submit"]:hover {
         background-color: #3e8e41;
         animation: pulse 0.5s;
       }
 
       @keyframes fadein {
+<<<<<<< HEAD
         from { opacity: 0; }
         to { opacity: 1; }
       }
@@ -95,6 +123,41 @@
   font-family: 'Roboto', sans-serif;
 }
 
+=======
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes slidein {
+        from {
+          transform: translateX(-50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      body {
+        font-family: "Roboto", sans-serif;
+      }
+>>>>>>> 2fc817e (cicids)
     </style>
   </head>
   <body>
@@ -102,6 +165,7 @@
       <ul>
         <li><a href="{{ url_for('index')}}" class="btn-primary">Home</a></li>
         <li><a href="{{ url_for('about')}}" class="btn-primary">About</a></li>
+<<<<<<< HEAD
         <li><a href="{{ url_for('kaggle_balanced')}}" class="btn-primary">DDoS Balanced</a></li>
         <li><a href="{{ url_for('kaggle_unbalanced')}}" class="btn-primary">DDos Unbalanced</a></li>
         <li><a href="{{ url_for('CICIDS_1')}}" class="btn-primary">CICIDS 1</a></li>
@@ -151,4 +215,71 @@
   </style>
 </body>
 
+=======
+        <li>
+          <a href="{{ url_for('kaggle_balanced')}}" class="btn-primary"
+            >DDoS Balanced</a
+          >
+        </li>
+        <li>
+          <a href="{{ url_for('kaggle_unbalanced')}}" class="btn-primary"
+            >DDos Unbalanced</a
+          >
+        </li>
+        <li>
+          <a href="{{ url_for('CICIDS_1')}}" class="btn-primary">CICIDS 1</a>
+        </li>
+        <li>
+          <a href="{{ url_for('CICIDS_2')}}" class="btn-primary">CICIDS 2</a>
+        </li>
+      </ul>
+    </nav>
+    <br />
+    <br />
+    <br />
+
+    <h1>Upload the File</h1>
+    <form
+      form
+      method="POST"
+      enctype="multipart/form-data"
+      action="{{ url_for('predict_CICIDS1') }}"
+    >
+      <label for="csvFile">Select file:</label>
+
+      <input type="file" id="fileInput" name="fileInput" />
+      <br />
+      <input type="submit" value="Predict" />
+    </form>
+
+    <style>
+      nav {
+        background-color: #333;
+        padding: 10px 0;
+        position: fixed;
+        top: 0;
+        width: 100%;
+      }
+
+      ul {
+        display: flex;
+        justify-content: center;
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      li {
+        margin: 0 20px;
+      }
+
+      a {
+        color: #f2f2f2;
+        font-family: "Quicksand", sans-serif;
+        text-decoration: none;
+        text-shadow: 1px 1px #333;
+      }
+    </style>
+  </body>
+>>>>>>> 2fc817e (cicids)
 </html>
