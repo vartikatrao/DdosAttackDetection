@@ -16,6 +16,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler, LabelEncoder
 app = Flask(__name__,template_folder='Templates')
 from flask import request
 import time 
+import joblib 
 
 @app.route('/kaggle_balanced')
 def kaggle_balanced():
@@ -160,7 +161,8 @@ def predict_balanced():
         x_test_cnn = x_test.reshape(x_test.shape[0], 52, 1).astype('float32')
 
         start_time_cnn = time.time()
-        y_pred_cnn= np.argmax(model_cnn_balanced.predict(x_test_cnn), axis=-1)
+        x_test_tensor = tf.convert_to_tensor(x_test, dtype=tf.float32)
+        y_pred_cnn= np.argmax(model_dnn_balanced.predict(x_test_tensor), axis=-1)
         end_time_cnn= time.time()
         inference_time_cnn= end_time_cnn- start_time_cnn
         print(y_pred_cnn)
@@ -207,8 +209,8 @@ def predict_balanced():
         return render_template('results.html')
 
 
-model_cnn_unbalanced = keras.models.load_model('models//kaggle//unbalanced//imbal_dnn_model.h5')
-model_dnn_unbalanced= keras.models.load_model('models//kaggle//unbalanced//unbalanced_cnn.h5')
+model_cnn_unbalanced = keras.models.load_model('models//kaggle//unbalanced//dnn_model.h5')
+model_dnn_unbalanced= keras.models.load_model('models//kaggle//unbalanced//cnn_model.h5')
 @app.route('/predict_unbalanced', methods=['GET', 'POST'])
 def predict_unbalanced():
     if request.method == 'POST':
@@ -318,7 +320,7 @@ def predict_unbalanced():
         df = df[desired_columns]
         x_test = df.values
         x_test_cnn = x_test.reshape(x_test.shape[0], 52, 1).astype('float32')
-
+        x_test_cnn =  tf.convert_to_tensor(x_test, dtype=tf.float32)
         start_time_cnn = time.time()
         y_pred_cnn = np.argmax(model_cnn_unbalanced.predict(x_test_cnn), axis=-1)
         end_time_cnn = time.time()
@@ -327,7 +329,7 @@ def predict_unbalanced():
         x_test_tensor = tf.convert_to_tensor(x_test, dtype=tf.float32)
 
         start_time_dnn = time.time()
-        y_pred_dnn = np.argmax(model_dnn_unbalanced.predict(x_test_tensor), axis=-1)
+        y_pred_dnn = np.argmax(model_dnn_balanced.predict(x_test_tensor), axis=-1)
         end_time_dnn = time.time()
         inference_time_dnn = end_time_dnn - start_time_dnn
 
@@ -356,18 +358,18 @@ def predict_unbalanced():
         return render_template('results.html', cnn_prediction=cnn_prediction, dnn_prediction=dnn_prediction, plot_data= data, cnn_inference_time=inference_time_cnn, dnn_inference_time= inference_time_dnn )
 def preprocess_cicids17_model(df):
     df = df.dropna().reset_index()
+    dp=df['Destination Port']
     df=df.drop('Destination Port',axis=1)
     data_clean = df.dropna().reset_index()
-    labelencoder = LabelEncoder()
-    data_clean['Label'] = labelencoder.fit_transform(data_clean['Label'])
-    data_clean['Label'].value_counts()
     data_np = data_clean.to_numpy(dtype="float32")
     data_np = data_np[~np.isinf(data_np).any(axis=1)]
     X = data_np[:, 0:78]
     print(df['Label'])
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(data_np)
-    return X_scaled
+    scaler = joblib.load('models//CICIDS_1//scaler.pkl')
+    scaler_dcnn=joblib.load('models//CICIDS_1//scaler_dcnn.pkl')
+    X_scaled = scaler.transform(data_np)
+    X_scal_dcnn=scaler_dcnn.transform(data_np)
+    return X_scaled,X_scal_dcnn
 cicids1dcnn=keras.models.load_model('models//CICIDS_1//dcnn_model.h5')
 cicids1dnn=keras.models.load_model('models//CICIDS_1//dnn_model.h5')
 @app.route('/predict_CICIDS1', methods=['GET', 'POST'])
@@ -375,15 +377,18 @@ def predict_CICIDS1():
     if request.method == 'POST':
         file = request.files['fileInput']
         df = pd.read_csv(file)
-        X = preprocess_cicids17_model(df)
-        
+        X,X1= preprocess_cicids17_model(df)
         start_time_cnn = time.time()
-        pred_cnn = cicids1dcnn.predict(X)
+        pred_cnn = cicids1dcnn.predict(X1)
+        predc = np.argmax(pred_cnn,axis=1)
+        #print(predc)
         end_time_cnn = time.time()
         inference_time_cnn = end_time_cnn - start_time_cnn
         
         start_time_dnn = time.time()
         pred_dnn = cicids1dnn.predict(X)
+        predd=np.argmax(pred_dnn,axis=1)
+        print(predd)
         end_time_dnn = time.time()
         inference_time_dnn = end_time_dnn - start_time_dnn
         
@@ -411,16 +416,14 @@ def predict_CICIDS1():
             14: 'Web Attack ï¿½ XSS'
         }
 
-        cnn = [label_mappings_dict[np.argmax(label)] for label in pred_cnn]
-        dnn = [label_mappings_dict[np.argmax(label)] for label in pred_dnn]
+        cnn = [label_mappings_dict[pred] for pred in predc]
+        dnn = [label_mappings_dict[pred] for pred in predd]
 
-        # Now cnn and dnn contain the original labels
         print("CNN Predictions:", cnn)
         print("DNN Predictions:", dnn)
 
         print(attack_types_cnn)
         print(attack_types_dnn)
-        # Generate plot
         models = ['DCNN', 'DNN']
         inference_times = [inference_time_cnn, inference_time_dnn]
 
@@ -438,7 +441,8 @@ def predict_CICIDS1():
         buf = BytesIO()
         plt.savefig(buf, format='png')
         plt.close()
-
+        cnn= cnn[0]
+        dnn= dnn[0]
         # Convert the buffer content to a string and encode it as base64
         data = base64.b64encode(buf.getbuffer()).decode('ascii')
         # Render the template with the results
@@ -451,24 +455,25 @@ def predict_CICIDS1():
     else:
         return render_template('results.html')
 
-# cicids2_resnet=keras.models.load_model('models//CICIDS_2//resnet_model.h5')
-# cicids2_vgg16=keras.models.load_model('models//CICIDS_2//vgg_16_model.h5')
-
+cicids2dcnn=keras.models.load_model('models//CICIDS_2//dcnn_model.h5')
+cicids2dnn=keras.models.load_model('models//CICIDS_2//dnn_model.h5')
 @app.route('/predict_CICIDS2', methods=['GET', 'POST'])
 def predict_CICIDS2():
     if request.method == 'POST':
         file = request.files['fileInput']
         df = pd.read_csv(file)
-        X = preprocess_cicids17_model(df)
-        
+        X,X1= preprocess_cicids17_model(df)
         start_time_cnn = time.time()
-        # pred_cnn = cicids2_resnet.predict(X)
-        pred_cnn=0
+        pred_cnn = cicids1dcnn.predict(X1)
+        predc = np.argmax(pred_cnn,axis=1)
+        #print(predc)
         end_time_cnn = time.time()
         inference_time_cnn = end_time_cnn - start_time_cnn
         
         start_time_dnn = time.time()
-        # pred_dnn = cicids2_vgg16.predict(X)
+        pred_dnn = cicids2dnn.predict(X)
+        predd=np.argmax(pred_dnn,axis=1)
+        print(predd)
         end_time_dnn = time.time()
         inference_time_dnn = end_time_dnn - start_time_dnn
         
@@ -496,17 +501,15 @@ def predict_CICIDS2():
             14: 'Web Attack ï¿½ XSS'
         }
 
-        cnn = [label_mappings_dict[np.argmax(label)] for label in pred_cnn]
-        dnn = [label_mappings_dict[np.argmax(label)] for label in pred_dnn]
+        cnn = [label_mappings_dict[pred] for pred in predc]
+        dnn = [label_mappings_dict[pred] for pred in predd]
 
-        # Now cnn and dnn contain the original labels
         print("CNN Predictions:", cnn)
         print("DNN Predictions:", dnn)
 
         print(attack_types_cnn)
         print(attack_types_dnn)
-        # Generate plot
-        models = ['Resnet', 'VGG 16']
+        models = ['DCNN', 'DNN']
         inference_times = [inference_time_cnn, inference_time_dnn]
 
         fig, ax = plt.subplots(figsize=(10, 8))
@@ -523,7 +526,8 @@ def predict_CICIDS2():
         buf = BytesIO()
         plt.savefig(buf, format='png')
         plt.close()
-
+        cnn= cnn[0]
+        dnn= dnn[0]
         # Convert the buffer content to a string and encode it as base64
         data = base64.b64encode(buf.getbuffer()).decode('ascii')
         # Render the template with the results
